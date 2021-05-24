@@ -5,6 +5,7 @@ This is sketches and practices using [LOVE](https://love2d.org).
 ## Skethces
 
 1. [2021-05-25 noise circles](2021-05-25-noise-circles)
+2. [2021-05-25 shift](2021-05-25-shift)
 
 ## See also
 
