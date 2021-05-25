@@ -2,6 +2,13 @@
 
 This is sketches and practices using [LOVE](https://love2d.org).
 
+## How to run
+
+1. Install LOVE
+2. Clone this repository
+3. Run `love` command with game directory
+    - for instance: `love ./2021-05-25-noise-circles`
+
 ## Skethces
 
 1. [2021-05-25 noise circles](2021-05-25-noise-circles)
