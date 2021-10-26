@@ -1,0 +1,54 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '(:midi) :silent t)
+  )
+
+(defpackage :ros.script.note-on-from-midi.3844215986
+  (:use :cl))
+(in-package :ros.script.note-on-from-midi.3844215986)
+
+(defun bpm (midi-tempo)
+  (float (/ (* 60 1000 1000) midi-tempo)))
+
+(defun to-sec (tick tempo division)
+  (float (* tick (/ 60 (bpm tempo) division))))
+
+(defun tempo-list (midi)
+  (let ((tempo nil))
+    (loop
+      :for msg :in (elt (midi:midifile-tracks midi) 0)
+      :when (typep msg 'midi:tempo-message)
+      :do (push (midi:message-tempo msg) tempo))
+    (nreverse tempo)))
+
+(defun note-on-list (track)
+  (loop
+    :for msg :in track
+    :when (typep msg 'midi:note-on-message)
+    :collect (midi:message-time msg)))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (let* ((track-no (if (null (first argv))
+                       0
+                       (parse-integer (first argv))))
+         (var-name (if (null (second argv))
+                       "test"
+                       (second argv)))
+         (midi (midi:read-midi-file "drop.mid"))
+         (division (midi:midifile-division midi))
+         (tracks (midi:midifile-tracks midi))
+         (tempo (first (tempo-list midi))))
+    (format t "-- track = ~a, bpm = ~a, division = ~a~%" track-no (bpm tempo) division)
+    (format t "local ~a = {}~%" var-name)
+    (loop
+      :for n := 0 :then (incf n)
+      :for time :in (note-on-list (elt tracks track-no))
+      :do  (format t "~a[~a] = ~a -- <= ~a / ~a~%" var-name n (to-sec time tempo division) time tempo))
+    (format t "return {noteOns = ~a}" var-name)))
+;;; vim: set ft=lisp lisp:
